@@ -28,7 +28,7 @@ var QuizQuestion = React.createClass({
   getInitialState: function() {
     return {
       question_structure: [
-        { text: "Question one" },
+        { text: "Hello one" },
       ]
     }
   },
