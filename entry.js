@@ -17,6 +17,7 @@ firebase.initializeApp(config);
 var Question = React.createClass({
     getInitialState: function() {
       return {
+        
         questions: [{
             title : "",
             question : "",
@@ -25,6 +26,7 @@ var Question = React.createClass({
             option_c : "",
             option_d : "",
             answer : "",
+            question_number: "",
           }],
           firebasekey: "",
           error: false
@@ -33,15 +35,16 @@ var Question = React.createClass({
     // when *this Question* component (list of questions) is about to go on the screen - on render
     componentWillMount() {
 
-      console.log('title', this.state.questions.title);
-
-      this.firebase = firebase.database().ref('hy-quiz-3');
+      this.firebase = firebase.database().ref('hy-quiz-6');
 
       this.firebase.on('child_added', function(dataSnapshot){
+
         this.setState({
           questions: dataSnapshot.val(),
         });
+
       }.bind(this));
+
     },
 
     AddNewQuestion() {
@@ -55,6 +58,7 @@ var Question = React.createClass({
           option_c : "",
           option_d : "",
           answer : "",
+          question_number: "",
         };
 
         var newQuestions = this.state.questions.concat(newMultipleChoiceQuestion);
@@ -72,8 +76,7 @@ var Question = React.createClass({
 
     },
 
-    setText: function(key, index, event) {
-      // whatever is the text of the input field (event.target)
+    SetQuizQuestionText: function(key, index, event) {
 
       // TODO: investigate immutability in react state
       this.state.questions[index][key] = event.target.value;
@@ -104,26 +107,27 @@ var Question = React.createClass({
       return (
         <div>
 
-          <input value={ this.state.questions.title } onChange={ component.setText.bind(component, "Title of Quiz", index) } placeholder='Title of entire quiz' />
+          {/* .bind(component, "Title of Quiz", index) */}
+          <section className="ui form">
+            <input value={ this.state.questions.title } onChange={ component.SetQuizTitle } placeholder='Title of entire quiz' />
+          </section>
 
           { this.state.questions.map(function(singleQuestion, index) {
+
             return (
-              <form key={ index } className="ui form">
-                <div>
+              <form className="ui form" key={ index } >
 
-                  <p>new row</p>
+                <p value={ index }>Question { index }</p>
 
-                  <section className="wrapper__question-wrap">
+                <section className="card">
+                  <input value={ singleQuestion.question } onChange={ component.SetQuizQuestionText.bind(component, "question", index) } placeholder='Question' />
+                  <input value={ singleQuestion.option_a } onChange={ component.SetQuizQuestionText.bind(component, "option_a", index) } placeholder='Option a' />
+                  <input value={ singleQuestion.option_b } onChange={ component.SetQuizQuestionText.bind(component, "option_b", index) } placeholder='Option b' />
+                  <input value={ singleQuestion.option_c } onChange={ component.SetQuizQuestionText.bind(component, "option_c", index) } placeholder='Option c' />
+                  <input value={ singleQuestion.option_d } onChange={ component.SetQuizQuestionText.bind(component, "option_d", index) } placeholder='Option d' />
+                  <input value={ singleQuestion.answer } onChange={ component.SetQuizQuestionText.bind(component, "answer", index) } placeholder='Answer' />
+                </section>
 
-                    <input value={ singleQuestion.question } onChange={ component.setText.bind(component, "question", index) } placeholder='Question' />
-                    <input value={ singleQuestion.option_a } onChange={ component.setText.bind(component, "option_a", index) } placeholder='Option a' />
-                    <input value={ singleQuestion.option_b } onChange={ component.setText.bind(component, "option_b", index) } placeholder='Option b' />
-                    <input value={ singleQuestion.option_c } onChange={ component.setText.bind(component, "option_c", index) } placeholder='Option c' />
-                    <input value={ singleQuestion.option_d } onChange={ component.setText.bind(component, "option_d", index) } placeholder='Option d' />
-
-                    <input value={ singleQuestion.answer } onChange={ component.setText.bind(component, "answer", index) } placeholder='Answer' />
-                  </section>
-                </div>
               </form>
             )
           }) }
