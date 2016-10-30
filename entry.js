@@ -15,67 +15,48 @@ firebase.initializeApp(config);
 
 // Single question component
 var Question = React.createClass({
+
     getInitialState: function() {
-      return {
-        quiz: {
-          title: "",
-          questions_object: [{
-            question : "",
-            option_a : "",
-            option_b : "",
-            option_c : "",
-            option_d : "",
-            answer : "",
-          }]
-        },
-        // questions: [{
-        //     title : "",
-        //     question : "",
-        //     option_a : "",
-        //     option_b : "",
-        //     option_c : "",
-        //     option_d : "",
-        //     answer : "",
-        //     question_number: "",
-        //   }],
-          firebasekey: "",
-          dummy_key_fake: "with a set string value",
-          error: false
-      }
+        return {
+          quiz: {
+            note: '',
+            author: '',
+            questions: [{
+              'q_1': '',
+              'q_2': '',
+            }]
+          }
+        }
     },
 
     // when *this Question* component (list of questions) is about to go on the screen - on render
-    componentWillMount() {
-      // console.log('initial state', this.state.quiz.questions_object);
-
-      this.firebase = firebase.database().ref('hy-quiz-9');
-
-      this.firebase.on('child_added', function(dataSnapshot){
-
-        this.setState({
-          questions: dataSnapshot.val(),
-        });
-
-      }.bind(this));
-
-    },
-
+    // componentWillMount() {
+    //   // console.log('initial state', this.state.quiz.questions_object);
+    //   console.log('log initial state', this.state);
+    //   this.firebase = firebase.database().ref('hy-quiz-9');
+    //
+    //   this.firebase.on('child_added', function(dataSnapshot){
+    //
+    //     this.setState({
+    //       questions_object: dataSnapshot.val(),
+    //     });
+    //
+    //   }.bind(this));
+    //
+    // },
     AddNewQuestion() {
 
-      // console.log('AddNewQuestion -- add a question');
-
         var newMultipleChoiceQuestion = {
-          question : "",
-          option_a : "",
-          option_b : "",
-          option_c : "",
-          option_d : "",
-          answer : "",
+          'q_1': '',
+          'q_2': '',
         };
 
-        var newQuestions = this.state.quiz.questions_object.concat(newMultipleChoiceQuestion);
+        console.log('AddNewQuestion -- add a question', newMultipleChoiceQuestion);
 
-        // console.log('logs --  newQuestions', newQuestions);
+        var newQuestions = this.state.quiz['questions_object'].concat(newMultipleChoiceQuestion);
+        console.log(this.state);
+
+        console.log('logs --  newQuestions', newQuestions);
         // updates state to have another question
 
         this.setState({
@@ -87,7 +68,6 @@ var Question = React.createClass({
 
 
     },
-
     SetQuizQuestionText: function(key, index, event) {
       // TODO: investigate immutability in react state
       // console.log(event.target.value);
@@ -102,57 +82,56 @@ var Question = React.createClass({
     },
 
     sendToFirebase: function(data) {
+      console.log(this.state);
+
+      // var quiz = this.state.quiz;
+      // this.setState({quiz: quiz});
 
       this.setState({
         quiz: this.state.quiz
       });
+
       // console.log('97 -- questions', this.state.questions);
       this.firebase.push(data);
     },
 
     render: function() {
       var component = this;
-
-      console.log('line 116', this.state);
-
       return (
         <div>
+          <input name='note' placeholder='NotName' value={ this.state.quiz.note } onChange={ this.updateField } />
+          <input name='author' placeholder='Author' value={ this.state.quiz.author } onChange={ this.updateField } />
 
-          { this.state.quiz.questions.map(function(singleQuestion, index) {
+          <input name='q_1' placeholder='question_one' value={ this.state.quiz.q_1 } onChange={ this.updateField } />
+          <input name='q_2' placeholder='question_two' value={ this.state.quiz.q_2 } onChange={ this.updateField } />
 
-            return (
-              <div className="ui form" key={ index } >
-                <section className="card">
-                  <input value={ singleQuestion.question } onChange={ component.SetQuizQuestionText.bind(component, "question", index) } placeholder='Question' />
-                  <input value={ singleQuestion.option_a } onChange={ component.SetQuizQuestionText.bind(component, "option_a", index) } placeholder='Option a' />
-                  <input value={ singleQuestion.option_b } onChange={ component.SetQuizQuestionText.bind(component, "option_b", index) } placeholder='Option b' />
-                  <input value={ singleQuestion.option_c } onChange={ component.SetQuizQuestionText.bind(component, "option_c", index) } placeholder='Option c' />
-                  <input value={ singleQuestion.option_d } onChange={ component.SetQuizQuestionText.bind(component, "option_d", index) } placeholder='Option d' />
-                  <input value={ singleQuestion.answer } onChange={ component.SetQuizQuestionText.bind(component, "answer", index) } placeholder='Answer' />
-                </section>
-              </div>
-            )
-
-          }) }
-
-            <button className="ui button" onClick={ this.AddNewQuestion } type="submit">Add a new multiple choice question</button>
-            <button className="ui primary button" onClick={() => { this.sendToFirebase(this.state.quiz); }} type="submit">send To Firebase</button>
+          <button onClick={ this.AddNewQuestion } >Add news question</button>
         </div>
       )
+    },
+
+    updateField: function(evt) {
+    var quiz = this.state.quiz;
+
+      quiz[evt.target.name] = evt.target.value;
+      console.log('log state', this.state);
+
+      this.setState({
+        quiz: quiz
+      });
+
+      console.log('quiz', quiz);
     }
 });
 
 var App = React.createClass({
-  onButtonSubmit: function() {
-    // console.log('<Question />');
-  },
+
   render: function(){
     return (
       <div>
         <div className="ui sizer vertical segment">
           <h1 className="ui huge header">This is my App component</h1>
         </div>
-
         <Question />
       </div>
     )
