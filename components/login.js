@@ -12,32 +12,32 @@ var Login = React.createClass({
   },
 
   render: function() {
-    return <div>
+    return <section className="ui form">
       { this.state.error ? <div>{ this.state.error }</div> : null }
-      <div>
-        <label>
-          <input type='radio' value='login' checked={ this.state.mode == 'login' } onChange={ this.setMode } />
-          Login
-        </label>
-        <label>
-          <input type='radio' value='signup' checked={ this.state.mode == 'signup' } onChange={ this.setMode } />
-          Signup
-        </label>
+      <div className="inline fields">
+          <div className="field">
+            <input className="ui checkbox" type='radio' value='login' checked={ this.state.mode == 'login' } onChange={ this.setMode } />
+            <label>Login</label>
+          </div>
+          <div className="field">
+            <input className="ui checkbox" type='radio' value='signup' checked={ this.state.mode == 'signup' } onChange={ this.setMode } />
+            <label>Signup</label>
+          </div>
       </div>
-      <div>
-        <label for='email'>Email</label>
-        <input type='text' name='email' value={ this.state.email } onChange={ this.setEmail } />
+      <div className="inline fields">
+        <label for='email' className="ui violet horizontal label">Email</label>
+        <input className="ui large input" type='text' name='email' value={ this.state.email } onChange={ this.setEmail } />
       </div>
-      <div>
-        <label for='email'>Password</label>
-        <input type='password' name='password' value={ this.state.password } onChange={ this.setPassword } />
+      <div className="inline fields">
+        <label for='email' className="ui violet horizontal label">Password</label>
+        <input className="ui large input" type='password' name='password' value={ this.state.password } onChange={ this.setPassword } />
       </div>
-      <div>
-        <button onClick={ this.login }>
+      <div className="inline fields">
+        <button className="ui violet button" onClick={ this.login }>
           { this.state.mode == 'login' ? "Login" : "Sign Up" }
         </button>
       </div>
-    </div>
+    </section>
   },
 
   setEmail: function(evt) { this.setState({ email: evt.target.value }); },

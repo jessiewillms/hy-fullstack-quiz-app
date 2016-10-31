@@ -16,25 +16,28 @@ var config = {
   messagingSenderId: "388978898226"
 };
 
-var $number_of_questions = 1;
-
 firebase.initializeApp(config);
 
-// TODO: Have this appear when submit & <5 questions
-// var AddMoreQuestionsModal = React.createClass({
-//   render: function() {
-//     return <div>
-//       <h1 className='greeting'>Add more</h1>
-//     </div>
-//   }
-// });
+// TODO: Doesn't need to be a variable; set to make testing easier
+var $number_of_questions = 1;
 
+// TODO: Have this appear when submit & <5 questions
+var AddMoreQuestionsModal = React.createClass({
+  render: function() {
+    return <div>
+      <h1 className='greeting'>Add more</h1>
+    </div>
+  }
+});
+
+// On click of create quiz button
 var CreateAQuiz = React.createClass({
   render: function() {
     return <div><Question /></div>;
   }
 });
 
+// On click of take quiz button
 var TakeAQuiz = React.createClass({
   render: function() {
     return <div><QuizzesFromFirebase /></div>;
@@ -42,13 +45,22 @@ var TakeAQuiz = React.createClass({
 });
 
 var QuizzesFromFirebase = React.createClass({
-  render: function() {
+    render: function() {
+      $.ajax({
+      url: 'https://quiz-hy.firebaseio.com/.json',
+      method: 'GET',
+      success: function(data) {
+        console.log(data);
+        // component.setState({ messages: data});
+      }
+    })
     return (
-      <div>Quizzes from FB</div>
+      <div>
+        <div className="ui huge header">Quizzes from FB</div>
+      </div>
     )
   }
 })
-
 
 // Single question component
 var Question = React.createClass({
@@ -83,6 +95,7 @@ var Question = React.createClass({
       }
     },
 
+    // TODO: counter increment in the state (ie., number of questions)
     // counter: function(){
     //   var newCount = this.state.counter + 1;
     //   this.state.counter = newCount;
@@ -119,9 +132,7 @@ var Question = React.createClass({
         };
         console.log(newMultipleChoiceQuestion);
 
-
         // var newQuestions = this.state.quiz.questions.concat(newMultipleChoiceQuestion);
-
         // updates state to have another question
         var updatedQuiz = this.state.quiz.questions.push(newMultipleChoiceQuestion);
 
@@ -133,7 +144,7 @@ var Question = React.createClass({
         console.log(this.state.quiz);
     },
 
-    SetQuizQuestionText: function(key, index, event) {
+    setQuizQuestionText: function(key, index, event) {
 
       // TODO: investigate immutability in react state
       this.state.quiz.questions[index][key] = event.target.value;
@@ -180,6 +191,7 @@ var Question = React.createClass({
       } else {
         // TODO: render a modal component here
         alert('Not enough questions!');
+        <AddMoreQuestionsModal />
       }
 
     },
@@ -197,7 +209,7 @@ var Question = React.createClass({
           {/* { this.counter() } */}
           {/* { this.make() } */}
 
-             <input onChange={ this.createTitle }/>
+             <input className="ui large input" onChange={ this.createTitle }/>
              <button className="ui primary button" onClick={ () => {this.sendTitleToFirebase(this.state.quiz.title)} }>send Title To Firebase</button>
 
              {/* { this.state.quiz.questions.map(function(singleQuestion, index) {
@@ -209,11 +221,11 @@ var Question = React.createClass({
 
                   <section className="card">
 
-                    <input value={ singleQuestion.question } onChange={ component.SetQuizQuestionText.bind(component, "question", index) } placeholder='Question' />
-                    <input value={ singleQuestion.option_a } onChange={ component.SetQuizQuestionText.bind(component, "option_a", index) } placeholder='Option a' />
-                    <input value={ singleQuestion.option_b } onChange={ component.SetQuizQuestionText.bind(component, "option_b", index) } placeholder='Option b' />
-                    <input value={ singleQuestion.option_c } onChange={ component.SetQuizQuestionText.bind(component, "option_c", index) } placeholder='Option c' />
-                    <input value={ singleQuestion.option_d } onChange={ component.SetQuizQuestionText.bind(component, "option_d", index) } placeholder='Option d' />
+                    <input className="ui large input" value={ singleQuestion.question } onChange={ component.SetQuizQuestionText.bind(component, "question", index) } placeholder='Question' />
+                    <input className="ui large input" value={ singleQuestion.option_a } onChange={ component.SetQuizQuestionText.bind(component, "option_a", index) } placeholder='Option a' />
+                    <input className="ui large input" value={ singleQuestion.option_b } onChange={ component.SetQuizQuestionText.bind(component, "option_b", index) } placeholder='Option b' />
+                    <input className="ui large input" value={ singleQuestion.option_c } onChange={ component.SetQuizQuestionText.bind(component, "option_c", index) } placeholder='Option c' />
+                    <input className="ui large input" value={ singleQuestion.option_d } onChange={ component.SetQuizQuestionText.bind(component, "option_d", index) } placeholder='Option d' />
 
                     <select className="ui fluid dropdown" value={ singleQuestion.answer } onChange={ component.SetQuizQuestionText.bind(component, "answer", index) }>
                       <option>Option a</option>
@@ -227,8 +239,8 @@ var Question = React.createClass({
             }) } */}
 
               <div className="ui sizer vertical segment">
-                <button className="ui button" onClick={ this.AddNewQuestion } type="submit">Add a new multiple choice question</button>
-                <button className="ui primary button" onClick={() => { this.sendToFirebase(this.state.quiz.questions); }} type="submit">send To Firebase</button>
+                <button className="ui grey button" onClick={ this.AddNewQuestion } type="submit">Add a new multiple choice question</button>
+                <button className="ui violet button" onClick={() => { this.sendToFirebase(this.state.quiz.questions); }} type="submit">send To Firebase</button>
               </div>
           </div>
         )
@@ -242,22 +254,25 @@ var App = React.createClass({
   getInitialState: function() {
     return {
       currentUser: null,
-      loggedIn: false
+      loggedIn: false,
+      displayFlashMessage: true
     }
   },
   render: function() {
     if (this.state.loggedIn) {
       return <div>
-        <div className="ui huge header">Login successful! Welcome back, { this.state.currentUser }</div>
-        { this.props.children }
-        <div className="ui sizer vertical segment">
-            <h1 className="ui large header">Quiz app</h1>
-            <div className="ui huge buttons">
-              <Link to="/page1"><button className="ui button">Create A New Quiz</button></Link>
-              <div className="or"></div>
-              <Link to="/page2"><button className="ui button">Take an Existing Quiz</button></Link>
-            </div>
+        <div className="ui huge buttons">
+          <Link to="/page1"><button className="ui button">Create A New Quiz</button></Link>
+          <div className="or"></div>
+          <Link to="/page2"><button className="ui button">Take an Existing Quiz</button></Link>
         </div>
+
+        {/* // TODO: hide this after three seconds */}
+        <div className="ui huge header flash-message" >
+          Login successful! Welcome back, { this.state.currentUser }
+        </div>
+        { this.props.children }
+
       </div>
     } else {
       return <Login onLogin={ this.loginUser }/>
@@ -265,23 +280,23 @@ var App = React.createClass({
   },
   loginUser: function(email) {
     this.setState({loggedIn: true, currentUser: email});
-  }
-
-  // render: function(){
-  //   return (
-  //
-  //   )
-  // }
+  },
+  componentDidMount(displayFlashMessage) {
+    this.setState({displayFlashMessage: false});
+  },
 })
 
 ReactDOM.render(
   <div>
-    <App />
-    {/* <Router history={browserHistory}>
+    <div className="ui sizer vertical segment">
+        <h1 className="ui large header">Quiz app</h1>
+    </div>
+    <br></br>
+    <Router history={ browserHistory }>
       <Route path="/" component={ App }>
         <Route path="page1" component={ CreateAQuiz }/>
         <Route path="page2" component={ TakeAQuiz }/>
       </Route>
-    </Router> */}
+    </Router>
   </div>,
   document.getElementById('placeholder'));
