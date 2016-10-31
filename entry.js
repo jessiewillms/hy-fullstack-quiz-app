@@ -5,7 +5,7 @@ var Route = require('react-router').Route;
 var Link = require('react-router').Link;
 var browserHistory = require('react-router').browserHistory;
 var firebase = require('firebase');
-import login from './components/login';
+import Login from './components/login';
 var $ = require('jquery');
 
 var config = {
@@ -247,7 +247,18 @@ var App = React.createClass({
   },
   render: function() {
     if (this.state.loggedIn) {
-      return <div>Login successful! Welcome back, { this.state.currentUser }</div>
+      return <div>
+        <div className="ui huge header">Login successful! Welcome back, { this.state.currentUser }</div>
+        { this.props.children }
+        <div className="ui sizer vertical segment">
+            <h1 className="ui large header">Quiz app</h1>
+            <div className="ui huge buttons">
+              <Link to="/page1"><button className="ui button">Create A New Quiz</button></Link>
+              <div className="or"></div>
+              <Link to="/page2"><button className="ui button">Take an Existing Quiz</button></Link>
+            </div>
+        </div>
+      </div>
     } else {
       return <Login onLogin={ this.loginUser }/>
     }
@@ -258,17 +269,7 @@ var App = React.createClass({
 
   // render: function(){
   //   return (
-  //     <div>
-  //       <div className="ui sizer vertical segment">
-  //         <h1 className="ui huge header">Quiz app</h1>
-  //           <div className="ui huge buttons">
-  //             <Link to="/page1"><button className="ui button">Create A New Quiz</button></Link>
-  //             <div className="or"></div>
-  //             <Link to="/page2"><button className="ui button">Take an Existing Quiz</button></Link>
-  //           </div>
-  //       </div>
-  //       { this.props.children }
-  //     </div>
+  //
   //   )
   // }
 })
