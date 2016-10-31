@@ -5,6 +5,7 @@ var Route = require('react-router').Route;
 var Link = require('react-router').Link;
 var browserHistory = require('react-router').browserHistory;
 var firebase = require('firebase');
+import login from './components/login';
 var $ = require('jquery');
 
 var config = {
@@ -238,30 +239,48 @@ var Question = React.createClass({
 
 var App = React.createClass({
 
-  render: function(){
-    return (
-      <div>
-        <div className="ui sizer vertical segment">
-          <h1 className="ui huge header">Quiz app</h1>
-            <div className="ui huge buttons">
-              <Link to="/page1"><button className="ui button">Create A New Quiz</button></Link>
-              <div className="or"></div>
-              <Link to="/page2"><button className="ui button">Take an Existing Quiz</button></Link>
-            </div>
-        </div>
-        { this.props.children }
-      </div>
-    )
+  getInitialState: function() {
+    return {
+      currentUser: null,
+      loggedIn: false
+    }
+  },
+  render: function() {
+    if (this.state.loggedIn) {
+      return <div>Login successful! Welcome back, { this.state.currentUser }</div>
+    } else {
+      return <Login onLogin={ this.loginUser }/>
+    }
+  },
+  loginUser: function(email) {
+    this.setState({loggedIn: true, currentUser: email});
   }
+
+  // render: function(){
+  //   return (
+  //     <div>
+  //       <div className="ui sizer vertical segment">
+  //         <h1 className="ui huge header">Quiz app</h1>
+  //           <div className="ui huge buttons">
+  //             <Link to="/page1"><button className="ui button">Create A New Quiz</button></Link>
+  //             <div className="or"></div>
+  //             <Link to="/page2"><button className="ui button">Take an Existing Quiz</button></Link>
+  //           </div>
+  //       </div>
+  //       { this.props.children }
+  //     </div>
+  //   )
+  // }
 })
 
 ReactDOM.render(
   <div>
-    <Router history={browserHistory}>
+    <App />
+    {/* <Router history={browserHistory}>
       <Route path="/" component={ App }>
         <Route path="page1" component={ CreateAQuiz }/>
         <Route path="page2" component={ TakeAQuiz }/>
       </Route>
-    </Router>
+    </Router> */}
   </div>,
   document.getElementById('placeholder'));
