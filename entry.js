@@ -19,33 +19,59 @@ var $number_of_questions = 1;
 
 firebase.initializeApp(config);
 
-var AddMoreQuestionsModal = React.createClass({
+// TODO: Have this appear when submit & <5 questions
+// var AddMoreQuestionsModal = React.createClass({
+//   render: function() {
+//     return <div>
+//       <h1 className='greeting'>Add more</h1>
+//     </div>
+//   }
+// });
+
+var CreateAQuiz = React.createClass({
   render: function() {
-    return <div>
-      <h1 className='greeting'>Add more</h1>
-    </div>
+    return <div><Question /></div>;
   }
 });
+
+var TakeAQuiz = React.createClass({
+  render: function() {
+    return <div><QuizzesFromFirebase /></div>;
+  }
+});
+
+var QuizzesFromFirebase = React.createClass({
+  render: function() {
+    return (
+      <div>Quizzes from FB</div>
+    )
+  }
+})
+
+
 // Single question component
 var Question = React.createClass({
 
     getInitialState: function() {
       return {
-        questions: [{
-            question : "",
-            option_a : "",
-            option_b : "",
-            option_c : "",
-            option_d : "",
-            answer : "",
-            question_number: "",
-          }],
-          firebasekey: "",
-          error: false,
-          loading: false,
-          counter: 0,
-          title: ""
-      }
+        quiz: {
+          // empty_posts: [],
+          questions: [{
+              question : "",
+              option_a : "",
+              option_b : "",
+              option_c : "",
+              option_d : "",
+              answer : "",
+              question_number: "",
+            }],
+            firebasekey: "",
+            error: false,
+            loading: false,
+            counter: 0,
+            title: ""
+          }
+        }
     },
 
     error: function() {
@@ -56,19 +82,19 @@ var Question = React.createClass({
       }
     },
 
-    counter: function(){
-      var newCount = this.state.counter + 1;
-      this.state.counter = newCount;
-      console.log(this.state);
-    },
+    // counter: function(){
+    //   var newCount = this.state.counter + 1;
+    //   this.state.counter = newCount;
+    //   console.log(this.state);
+    // },
 
     // when *this Question* component (list of questions) is about to go on the screen - on render
     componentWillMount() {
-
-      this.firebase = firebase.database().ref('quiz-hy-new');
+      console.log('line 67 | ', this.state);
+      this.firebase = firebase.database().ref('quiz-hy-21');
 
       this.firebase.on('child_added', function(dataSnapshot){
-
+        // this happens when it mounts to DOM
         this.setState({
           questions: dataSnapshot.val(),
           loading: false,
@@ -90,23 +116,30 @@ var Question = React.createClass({
           answer : "",
           question_number: "",
         };
+        console.log(newMultipleChoiceQuestion);
 
-        var newQuestions = this.state.questions.concat(newMultipleChoiceQuestion);
+
+        // var newQuestions = this.state.quiz.questions.concat(newMultipleChoiceQuestion);
+
         // updates state to have another question
+        var updatedQuiz = this.state.quiz.questions.push(newMultipleChoiceQuestion);
+
         this.setState({
-          questions: newQuestions
+          quiz: updatedQuiz
         });
+
+        console.log(this.state);
+        console.log(this.state.quiz);
     },
 
     SetQuizQuestionText: function(key, index, event) {
 
       // TODO: investigate immutability in react state
-      this.state.questions[index][key] = event.target.value;
-
+      this.state.quiz.questions[index][key] = event.target.value;
       // console.log('73 logs this.state.question --', this.state.questions);
 
       this.setState({
-        questions: this.state.questions
+        questions: this.state.quiz.questions
       })
 
     },
@@ -118,31 +151,27 @@ var Question = React.createClass({
 
       // updating Title in state, but not being sent to Firebase
       this.setState({
-        title: this.state.title
+        title: this.state.quiz.title
        });
-
     },
 
     sendTitleToFirebase: function(title_data) {
+      console.log('called sendTitleToFirebase | ');
       this.setState({
-        questions: this.state.questions
+        title: this.state.title
       });
       this.firebase.push(title_data);
+      firebase.database().push(title_data);
+      // firebase.database().child('title').push(title_data);
     },
 
     sendToFirebase: function(data) {
-      // console.log('data', data);
-      // console.log(this.state);
-
-      var totalQuestions = this.state.questions.length;
+      var totalQuestions = this.state.quiz.questions.length;
       // console.log('totalQuestions length: ', this.state.questions.length);
-
       if (totalQuestions > $number_of_questions) {
-
         // console.log('totalQuestions: more than 5');
-
         this.setState({
-          questions: this.state.questions
+          questions: this.state.quiz.questions
         });
 
         this.firebase.push(data);
@@ -156,28 +185,28 @@ var Question = React.createClass({
 
     render: function() {
       var component = this;
+
+      console.log('160', this.state.quiz.questions);
       if (this.state.loading) {
         return <div>Loading...</div>
       } else {
         return (
           <div>
           { this.error() }
-          { this.counter() }
+          {/* { this.counter() } */}
           {/* { this.make() } */}
 
-             {/* value={ this.state.title }  */}
              <input onChange={ this.createTitle }/>
-             {/* <input placeholder="Add a title" value={ this.target.value } onChange={ this.createTitle }/> */}
+             <button className="ui primary button" onClick={ () => {this.sendTitleToFirebase(this.state.quiz.title)} }>send Title To Firebase</button>
 
-            { this.state.questions.map(function(singleQuestion, index) {
+             {/* { this.state.quiz.questions.map(function(singleQuestion, index) {
 
               return (
-                <form className="ui form sizer vertical segment" key={ index } >
+                <form className="ui raised very padded text container segment" key={ index } >
                   <div>Delete this question <span>x</span></div>
                   <h3 className="ui header" value={ index }>Question #{ index }.</h3>
 
                   <section className="card">
-                    {/* <input value={ singleQuestion.title } onChange={ component.SetQuizTitle } placeholder='Question title' /> */}
 
                     <input value={ singleQuestion.question } onChange={ component.SetQuizQuestionText.bind(component, "question", index) } placeholder='Question' />
                     <input value={ singleQuestion.option_a } onChange={ component.SetQuizQuestionText.bind(component, "option_a", index) } placeholder='Option a' />
@@ -194,12 +223,11 @@ var Question = React.createClass({
                   </section>
                 </form>
               )
-            }) }
+            }) } */}
 
               <div className="ui sizer vertical segment">
                 <button className="ui button" onClick={ this.AddNewQuestion } type="submit">Add a new multiple choice question</button>
-
-              <button className="ui primary button" onClick={() => { this.sendToFirebase(this.state.questions); }} type="submit">send To Firebase</button>
+                <button className="ui primary button" onClick={() => { this.sendToFirebase(this.state.quiz.questions); }} type="submit">send To Firebase</button>
               </div>
           </div>
         )
@@ -209,21 +237,19 @@ var Question = React.createClass({
 });
 
 var App = React.createClass({
-  onButtonSubmit: function() {
-    console.log('<Question />');
-  },
+
   render: function(){
     return (
       <div>
-
         <div className="ui sizer vertical segment">
           <h1 className="ui huge header">Quiz app</h1>
-          <br></br>
+            <div className="ui huge buttons">
+              <Link to="/page1"><button className="ui button">Create A New Quiz</button></Link>
+              <div className="or"></div>
+              <Link to="/page2"><button className="ui button">Take an Existing Quiz</button></Link>
+            </div>
         </div>
-        <br></br>
-        <div className="ui sizer vertical segment">
-          <Question />
-        </div>
+        { this.props.children }
       </div>
     )
   }
@@ -231,6 +257,11 @@ var App = React.createClass({
 
 ReactDOM.render(
   <div>
-        <App/>
+    <Router history={browserHistory}>
+      <Route path="/" component={ App }>
+        <Route path="page1" component={ CreateAQuiz }/>
+        <Route path="page2" component={ TakeAQuiz }/>
+      </Route>
+    </Router>
   </div>,
   document.getElementById('placeholder'));
