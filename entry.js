@@ -45,18 +45,28 @@ var TakeAQuiz = React.createClass({
 });
 
 var QuizzesFromFirebase = React.createClass({
+    // var component = this;
+    getInitialState: function() {
+      return {
+        firebase_quizzes: {
+          quiz_name: "",
+          quiz_author: "",
+        }
+      }
+    },
     render: function() {
       $.ajax({
       url: 'https://quiz-hy.firebaseio.com/.json',
       method: 'GET',
       success: function(data) {
-        console.log(data);
-        // component.setState({ messages: data});
+        console.log('log some info', data['quiz-hy-21']);
+        // this.setState({ quiz_name: data});
       }
     })
     return (
       <div>
         <div className="ui huge header">Quizzes from FB</div>
+        <div>{ data }</div>
       </div>
     )
   }
@@ -206,8 +216,6 @@ var Question = React.createClass({
         return (
           <div>
           { this.error() }
-          {/* { this.counter() } */}
-          {/* { this.make() } */}
 
              <input className="ui large input" onChange={ this.createTitle }/>
              <button className="ui primary button" onClick={ () => {this.sendTitleToFirebase(this.state.quiz.title)} }>send Title To Firebase</button>
